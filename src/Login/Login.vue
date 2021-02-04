@@ -4,9 +4,9 @@
             <img alt="Vue logo" src="../assets/logo.jpg" />
             <span style="">登录你的账户</span>
         </div>
-        <el-form ref="form" :model="form">
-            <el-form-item>
-                <el-input placeholder="用户名/邮箱" v-model="form.name">
+        <el-form ref="form" :model="form" :rules="rules">
+            <el-form-item prop="nickname">
+                <el-input placeholder="用户名/邮箱" v-model="form.nickname">
                     <template #prefix>
                         <i
                             class="iconfont icon-yonghu-fuben"
@@ -15,7 +15,7 @@
                     </template>
                 </el-input>
             </el-form-item>
-            <el-form-item>
+            <el-form-item prop="password">
                 <el-input
                     placeholder="密码"
                     v-model="form.password"
@@ -36,8 +36,8 @@
                     </template>
                 </el-input>
             </el-form-item>
-            <el-form-item>
-                <el-input placeholder="验证码" v-model="form.name">
+            <el-form-item prop="emailidentify">
+                <el-input placeholder="验证码" v-model="form.emailidentify">
                     <template #prefix>
                         <i
                             class="iconfont icon-dunpaibaowei"
@@ -51,7 +51,7 @@
                 >
                     <img
                         id="imgIdentifyingCode"
-                        style="height: 36px; width: 100px; cursor: pointer"
+                        style="height: 38px; width: 100px; cursor: pointer"
                         alt="点击更换"
                         title="点击更换"
                     />
@@ -72,18 +72,22 @@
                 >。</span
             >
             <el-row>
-                <el-button type="primary">登录</el-button>
+                <el-button type="primary" @click="submitForm('form')"
+                    >登录</el-button
+                >
             </el-row>
         </el-form>
         <el-row class="toRegister">
             <span
-                >新用户？<el-link
-                    :underline="false"
-                    type="primary"
-                    style="font-size: 16px; line-height: 20px"
-                    >注册</el-link
-                ></span
-            >
+                >新用户？<router-link to="/register"
+                    ><el-link
+                        :underline="false"
+                        type="primary"
+                        style="font-size: 16px; line-height: 20px"
+                        >注册</el-link
+                    ></router-link
+                >
+            </span>
         </el-row>
     </div>
 </template>
@@ -99,13 +103,30 @@ export default defineComponent({
             form: {
                 name: "",
                 password: "",
-                region: "",
-                date1: "",
-                date2: "",
-                delivery: false,
-                type: [],
-                resource: "",
-                desc: "",
+                emailidentify: "",
+            },
+            rules: {
+                nickname: [
+                    {
+                        required: true,
+                        message: "请输入用户名",
+                        trigger: "blur",
+                    },
+                ],
+                password: [
+                    {
+                        required: true,
+                        message: "请输入密码",
+                        trigger: "blur",
+                    },
+                ],
+                emailidentify: [
+                    {
+                        required: true,
+                        message: "请输入验证码",
+                        trigger: "blur",
+                    },
+                ],
             },
         };
     },
@@ -129,10 +150,20 @@ export default defineComponent({
             if (bRefresh) {
                 identifyCodeSrc =
                     // "https://www.xxx.xxx.xxx/imgCode?" + Math.random();
-                    "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg";
+                    "https://alifei05.cfp.cn/creative/vcg/veer/1600water/veer-140775274.jpg";
             }
             let objs = document.getElementById("imgIdentifyingCode");
             objs.src = identifyCodeSrc;
+        },
+        submitForm(formName) {
+            this.$refs[formName].validate((valid) => {
+                if (valid) {
+                    console.log(this.form)
+                } else {
+                    console.log("error submit!!");
+                    return false;
+                }
+            });
         },
     },
 });
@@ -196,8 +227,8 @@ img {
     top: 2px;
     right: 0;
     z-index: 5;
-    width: 102px; /*设置图片显示的宽*/
-    height: 36px; /*图片显示的高*/
+    width: 100px; /*设置图片显示的宽*/
+    height: 38px; /*图片显示的高*/
     background: #e2e2e2;
     margin: 0;
 }
