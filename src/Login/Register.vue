@@ -5,8 +5,8 @@
             <span style="">注册新账户</span>
         </div>
         <el-form ref="form" :model="form" :rules="rules">
-            <el-form-item prop="nickname">
-                <el-input placeholder="用户名" v-model="form.nickname">
+            <el-form-item prop="nick">
+                <el-input placeholder="用户名" v-model="form.nick">
                     <template #prefix>
                         <i
                             class="iconfont icon-yonghu-fuben"
@@ -25,6 +25,7 @@
                     </template>
                 </el-input>
             </el-form-item>
+            <!-- -->
             <el-form-item prop="emailidentify">
                 <el-input placeholder="邮箱验证码" v-model="form.emailidentify">
                     <template #prefix>
@@ -34,21 +35,14 @@
                         ></i>
                     </template>
                 </el-input>
-                <div
-                    class="divIdentifyingCode"
-                    @click="getIdentifyingCode()"
-                >
+                <div class="divIdentifyingCode" @click="getIdentifyingCode()">
                     <el-button type="info" id="identifyingCode">{{
                         identifytext
                     }}</el-button>
                 </div>
             </el-form-item>
-            <el-form-item prop="password1">
-                <el-input
-                    placeholder="密码"
-                    v-model="form.password1"
-                    show-password
-                >
+            <el-form-item prop="pwd1">
+                <el-input placeholder="密码" v-model="form.pwd1" show-password>
                     <template #prefix>
                         <i
                             class="iconfont icon-suo"
@@ -57,10 +51,10 @@
                     </template>
                 </el-input>
             </el-form-item>
-            <el-form-item prop="password2">
+            <el-form-item prop="pwd2">
                 <el-input
                     placeholder="确认密码"
-                    v-model="form.password2"
+                    v-model="form.pwd2"
                     show-password
                 >
                     <template #prefix>
@@ -110,6 +104,8 @@
 
 <script>
 import { defineComponent, ref } from "vue";
+import { BASE_API } from "../config/dev.js";
+import axios from "axios";
 // import Identify from "./Identify.vue";
 
 export default defineComponent({
@@ -128,7 +124,7 @@ export default defineComponent({
                 callback();
             }
         };
-        var email = (rule, value, callback) => {
+        var eMail = (rule, value, callback) => {
             const mailReg = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/;
             if (!value) {
                 return callback(new Error("请输入邮箱"));
@@ -144,7 +140,7 @@ export default defineComponent({
             } else if (value.length < 6) {
                 callback(new Error("密码需要大于等于6位"));
             } else {
-                if (this.form.password2 !== "") {
+                if (this.form.pwd2 !== "") {
                     this.$refs.form.validateField("password2");
                 }
                 callback();
@@ -155,34 +151,35 @@ export default defineComponent({
                 callback(new Error("请再次输入密码"));
             } else if (value.length < 6) {
                 callback(new Error("密码需要大于等于6位"));
-            } else if (value !== this.form.password1) {
+            } else if (value !== this.form.pwd1) {
                 callback(new Error("两次输入密码不一致!"));
             } else {
                 callback();
             }
         };
         return {
-			identifytext: "获取验证码",
-			timer: 0,
+            // BASE_API: BASE_API,
+            identifytext: "获取验证码",
+            timer: 0,
             form: {
-                nickname: "",
+                nick: "",
                 email: "",
                 emailidentify: "",
-                password1: "",
-                password2: "",
+                pwd1: "",
+                pwd2: "",
             },
             rules: {
-                nickname: [{ validator: nickname, trigger: "blur" }],
-                email: [{ validator: email, trigger: "blur" }],
+                nick: [{ validator: nickname, trigger: "blur" }],
+                email: [{ validator: eMail, trigger: "blur" }],
                 emailidentify: [
-                    {
-                        required: true,
-                        message: "请输入验证码",
-                        trigger: "blur",
-                    },
+                    // {
+                    //     required: true,
+                    //     message: "请输入验证码",
+                    //     trigger: "blur",
+                    // },
                 ],
-                password1: [{ validator: validatePass, trigger: "blur" }],
-                password2: [{ validator: validatePass2, trigger: "blur" }],
+                pwd1: [{ validator: validatePass, trigger: "blur" }],
+                pwd2: [{ validator: validatePass2, trigger: "blur" }],
             },
         };
     },
@@ -195,26 +192,47 @@ export default defineComponent({
          * @param {Boolean} bRefresh 是否刷新
          */
         getIdentifyingCode: function () {
-			this.timer = 60;
-			this.countDown();
-		},
-		countDown() {
-			if(this.timer > 0){
-				this.identifytext = this.timer + "s后重新获取";
-				this.timer --;
-				
-				setTimeout(this.countDown, 1000);
-			}
-			else{
-				this.identifytext = "重新获取验证码"
-			}
-		},
+            this.timer = 60;
+            this.countDown();
+        },
+        countDown() {
+            if (this.timer > 0) {
+                this.identifytext = this.timer + "s后重新获取";
+                this.timer--;
+
+                setTimeout(this.countDown, 1000);
+            } else {
+                this.identifytext = "重新获取验证码";
+            }
+        },
         submitForm(form) {
             this.$refs[form].validate((valid) => {
                 if (valid) {
                     console.log(this.form);
+                    // console.log(axios);
+                    axios
+                        .post(BASE_API + "/api/auth/register", this.form)
+                        .then((response) => {
+                            if (response.data.code == 200) {
+                                //注册成功
+                                console.log("注册成功");
+                                console.log(response.data.msg);
+                            } else if (response.data.code == 422) {
+                                console.log("验证错误");
+                                //后端验证错误
+                            } else if (response.data.code == 500) {
+                                console.log("服务端错误");
+                                //服务端密码加密错误
+                            }
+                        })
+                        .catch((error) => {
+                            alert("注册失败，请重新注册");
+                        });
                 } else {
+                    // console.log(axios)
+                    // console.log(BASE_API)
                     console.log("error submit!!");
+
                     return false;
                 }
             });

@@ -158,7 +158,7 @@ export default defineComponent({
         submitForm(formName) {
             this.$refs[formName].validate((valid) => {
                 if (valid) {
-                    console.log(this.form)
+                    console.log(this.form);
                 } else {
                     console.log("error submit!!");
                     return false;
