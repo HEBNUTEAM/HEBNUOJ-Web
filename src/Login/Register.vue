@@ -41,8 +41,8 @@
                     }}</el-button>
                 </div>
             </el-form-item>
-            <el-form-item prop="pwd1">
-                <el-input placeholder="密码" v-model="form.pwd1" show-password>
+            <el-form-item prop="pwd">
+                <el-input placeholder="密码" v-model="form.pwd" show-password>
                     <template #prefix>
                         <i
                             class="iconfont icon-suo"
@@ -51,10 +51,10 @@
                     </template>
                 </el-input>
             </el-form-item>
-            <el-form-item prop="pwd2">
+            <el-form-item prop="pwd1">
                 <el-input
                     placeholder="确认密码"
-                    v-model="form.pwd2"
+                    v-model="form.pwd1"
                     show-password
                 >
                     <template #prefix>
@@ -140,7 +140,7 @@ export default defineComponent({
             } else if (value.length < 6) {
                 callback(new Error("密码需要大于等于6位"));
             } else {
-                if (this.form.pwd2 !== "") {
+                if (this.form.pwd1 !== "") {
                     this.$refs.form.validateField("password2");
                 }
                 callback();
@@ -151,7 +151,7 @@ export default defineComponent({
                 callback(new Error("请再次输入密码"));
             } else if (value.length < 6) {
                 callback(new Error("密码需要大于等于6位"));
-            } else if (value !== this.form.pwd1) {
+            } else if (value !== this.form.pwd) {
                 callback(new Error("两次输入密码不一致!"));
             } else {
                 callback();
@@ -165,8 +165,8 @@ export default defineComponent({
                 nick: "",
                 email: "",
                 emailidentify: "",
+                pwd: "",
                 pwd1: "",
-                pwd2: "",
             },
             rules: {
                 nick: [{ validator: nickname, trigger: "blur" }],
@@ -178,8 +178,8 @@ export default defineComponent({
                     //     trigger: "blur",
                     // },
                 ],
-                pwd1: [{ validator: validatePass, trigger: "blur" }],
-                pwd2: [{ validator: validatePass2, trigger: "blur" }],
+                pwd: [{ validator: validatePass, trigger: "blur" }],
+                pwd1: [{ validator: validatePass2, trigger: "blur" }],
             },
         };
     },

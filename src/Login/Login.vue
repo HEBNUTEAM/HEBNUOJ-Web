@@ -5,8 +5,8 @@
             <span style="">登录你的账户</span>
         </div>
         <el-form ref="form" :model="form" :rules="rules">
-            <el-form-item prop="nickname">
-                <el-input placeholder="用户名/邮箱" v-model="form.nickname">
+            <el-form-item prop="email">
+                <el-input placeholder="用户名/邮箱" v-model="form.email">
                     <template #prefix>
                         <i
                             class="iconfont icon-yonghu-fuben"
@@ -15,11 +15,11 @@
                     </template>
                 </el-input>
             </el-form-item>
-            <el-form-item prop="password">
+            <el-form-item prop="pwd">
                 <el-input
                     placeholder="密码"
-                    v-model="form.password"
-                    show-password
+                    v-model="form.pwd"
+                    show-pwd
                 >
                     <template #prefix>
                         <i
@@ -95,38 +95,40 @@
 <script>
 import { defineComponent, ref } from "vue";
 import Identify from "./Identify.vue";
+import axios from "axios";
+import { BASE_API } from "../config/dev";
 
 export default defineComponent({
     name: "Login",
     data() {
         return {
             form: {
-                name: "",
-                password: "",
+                email: "",
+                pwd: "",
                 emailidentify: "",
             },
             rules: {
-                nickname: [
+                email: [
                     {
                         required: true,
                         message: "请输入用户名",
                         trigger: "blur",
                     },
                 ],
-                password: [
+                pwd: [
                     {
                         required: true,
                         message: "请输入密码",
                         trigger: "blur",
                     },
                 ],
-                emailidentify: [
-                    {
-                        required: true,
-                        message: "请输入验证码",
-                        trigger: "blur",
-                    },
-                ],
+                // emailidentify: [
+                //     {
+                //         required: true,
+                //         message: "请输入验证码",
+                //         trigger: "blur",
+                //     },
+                // ],
             },
         };
     },
@@ -159,6 +161,13 @@ export default defineComponent({
             this.$refs[formName].validate((valid) => {
                 if (valid) {
                     console.log(this.form);
+                    axios.post(BASE_API + "/api/auth/login", this.form)
+                        .then(resp => {
+                            this.$message({
+                                type: 'success',
+                                message: '登陆成功！'
+                            })
+                        })
                 } else {
                     console.log("error submit!!");
                     return false;
