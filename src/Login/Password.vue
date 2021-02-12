@@ -143,13 +143,16 @@ export default defineComponent({
         Identify,
     },
     methods: {
-        /**
-         * 窗口代码
-         * @param {Boolean} bRefresh 是否刷新
-         */
         getIdentifyingCode: function () {
-            this.timer = 60;
-			this.countDown();
+			this.$refs.form.validateField('email', (emailError) => {
+				if(!emailError){
+					this.timer = 60;
+            		this.countDown();
+				} else{
+					console.log(emailError);
+				}
+				
+			});
 		},
 		countDown() {
 			if(this.timer > 0){

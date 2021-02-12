@@ -26,8 +26,8 @@
                 </el-input>
             </el-form-item>
             <!-- -->
-            <el-form-item prop="emailidentify">
-                <el-input placeholder="邮箱验证码" v-model="form.emailidentify">
+            <el-form-item prop="verification">
+                <el-input placeholder="邮箱验证码" v-model="form.verification">
                     <template #prefix>
                         <i
                             class="iconfont icon-dunpaibaowei"
@@ -40,6 +40,29 @@
                         identifytext
                     }}</el-button>
                 </div>
+            </el-form-item>
+            <el-form-item prop="captcha">
+                <el-input placeholder="图形验证码" v-model="form.captcha">
+                    <template #prefix>
+                        <i
+                            class="iconfont icon-dunpaibaowei"
+                            style="font-size: 22px; margin: 3px"
+                        ></i>
+                    </template>
+                </el-input>
+                <div
+                    class="divIdentifyingCode"
+                    @click="getPhotoIdentifyingCode(true)"
+                >
+                    <img
+                        id="imgIdentifyingCode"
+                        style="height: 38px; width: 100px; cursor: pointer"
+                        alt="点击更换"
+                        title="点击更换"
+                        :src="imgSrc"
+                    />
+                </div>
+                <!-- <Identify></Identify> -->
             </el-form-item>
             <el-form-item prop="pwd">
                 <el-input placeholder="密码" v-model="form.pwd" show-password>
@@ -134,6 +157,11 @@ export default defineComponent({
                 callback();
             }
         };
+        // var identify = (rule, value, callback) => {
+        // 	if(this.form.email == ""){
+        // 		callback(new Error("请输入邮箱"));
+        // 	}
+        // };
         var validatePass = (rule, value, callback) => {
             if (value === "") {
                 callback(new Error("请输入密码"));
@@ -158,25 +186,34 @@ export default defineComponent({
             }
         };
         return {
-            // BASE_API: BASE_API,
+            imgSrc: "",
             identifytext: "获取验证码",
             timer: 0,
             form: {
                 nick: "",
                 email: "",
-                emailidentify: "",
+                verification: "",
+                captcha: "",
+                captchaid: "",
                 pwd: "",
                 pwd1: "",
             },
             rules: {
                 nick: [{ validator: nickname, trigger: "blur" }],
                 email: [{ validator: eMail, trigger: "blur" }],
-                emailidentify: [
-                    // {
-                    //     required: true,
-                    //     message: "请输入验证码",
-                    //     trigger: "blur",
-                    // },
+                verification: [
+                    {
+                        required: true,
+                        message: "请输入邮箱验证码",
+                        trigger: "blur",
+                    },
+                ],
+                captcha: [
+                    {
+                        required: true,
+                        message: "请输入图形验证码",
+                        trigger: "blur",
+                    },
                 ],
                 pwd: [{ validator: validatePass, trigger: "blur" }],
                 pwd1: [{ validator: validatePass2, trigger: "blur" }],
@@ -186,14 +223,107 @@ export default defineComponent({
     components: {
         // Identify,
     },
+    mounted: function () {
+        axios
+            .get(BASE_API + "/api/captcha/refresh")
+            .then((response) => {
+                if (response.data.code == 200) {
+                    //获取成功
+                    // console.log(response.data.data.CaptchaId);
+                    this.form.captchaid = response.data.data.CaptchaId;
+                    // console.log(this.form)
+                }
+            })
+            .then(() => {
+                axios
+                    .post(
+                        BASE_API + "/api/captcha/show",
+                        { captchaid: this.form.captchaid },
+                        { responseType: "blob" }
+                    )
+                    .then((resp) => {
+                        this.imgSrc = window.URL.createObjectURL(resp.data);
+						// console.log(resp.data)
+                        if (resp.data.code == 400) {
+                            console.log("30秒后在请求");
+                        }
+                    })
+                    .catch((error) => {
+                        console.log("图片请求失败");
+                    });
+            })
+            .catch((error) => {
+                alert("获取失败，请重新获取");
+            });
+    },
     methods: {
         /**
          * 窗口代码
          * @param {Boolean} bRefresh 是否刷新
          */
         getIdentifyingCode: function () {
-            this.timer = 60;
-            this.countDown();
+            //获取验证码之前必须先填邮箱
+            this.$refs.form.validateField("email", (emailError) => {
+                if (!emailError) {
+                    this.timer = 60;
+                    this.countDown();
+                    axios
+                        .post(BASE_API + "/api/email/refresh", {email: this.form.email})
+                        .then((response) => {
+							console.log(response.data)
+                            if (response.data.code == 200) {
+                                //获取成功
+                                // console.log("获取成功");
+                                console.log(response.data.msg);
+                            } else if (response.data.code == 422) {
+                                console.log("邮箱已存在");
+                                //后端验证错误
+                            }
+                        })
+                        .catch((error) => {
+                            alert("获取失败，请重新获取");
+                        });
+                } else {
+                    console.log(emailError);
+                }
+            });
+        },
+        getPhotoIdentifyingCode(bRefresh) {
+            if (bRefresh) {
+                axios
+                    .get(BASE_API + "/api/captcha/refresh")
+                    .then((response) => {
+                        if (response.data.code == 200) {
+                            //获取成功
+                            console.log(response.data.data.CaptchaId);
+                            this.form.captchaid = response.data.data.CaptchaId;
+                            // console.log(this.form)
+                        }
+                    })
+                    .then(() => {
+                        axios
+                            .post(
+                                BASE_API + "/api/captcha/show",
+                                { captchaid: this.form.captchaid },
+                                { responseType: "blob" }
+                            )
+                            .then((resp) => {
+                                this.imgSrc = window.URL.createObjectURL(
+                                    resp.data
+                                );
+
+                                if (resp.data.code == 400) {
+                                    console.log("30秒后在请求");
+                                }
+                            })
+                            .catch((error) => {
+                                alert("图片请求失败");
+                            });
+                    })
+                    .catch((error) => {
+                        alert("获取失败，请重新获取");
+                    });
+            }
         },
         countDown() {
             if (this.timer > 0) {

@@ -6,7 +6,7 @@
         </div>
         <el-form ref="form" :model="form" :rules="rules">
             <el-form-item prop="email">
-                <el-input placeholder="用户名/邮箱" v-model="form.email">
+                <el-input placeholder="用户名/邮箱" v-model="form.email" @blur="getIfShowIdentify()">
                     <template #prefix>
                         <i
                             class="iconfont icon-yonghu-fuben"
@@ -30,13 +30,13 @@
                     <template #suffix
                         ><router-link to="/password">
                             <el-link :underline="false" type="primary">
-                                忘记密码
+                                忘记密码？
                             </el-link></router-link
                         >
                     </template>
                 </el-input>
             </el-form-item>
-            <el-form-item prop="emailidentify">
+            <el-form-item prop="emailidentify" v-if="ifShow">
                 <el-input placeholder="验证码" v-model="form.emailidentify">
                     <template #prefix>
                         <i
@@ -102,6 +102,7 @@ export default defineComponent({
     name: "Login",
     data() {
         return {
+			ifShow: false,
             form: {
                 email: "",
                 pwd: "",
@@ -111,7 +112,7 @@ export default defineComponent({
                 email: [
                     {
                         required: true,
-                        message: "请输入用户名",
+                        message: "请输入用户名/邮箱",
                         trigger: "blur",
                     },
                 ],
@@ -122,13 +123,13 @@ export default defineComponent({
                         trigger: "blur",
                     },
                 ],
-                // emailidentify: [
-                //     {
-                //         required: true,
-                //         message: "请输入验证码",
-                //         trigger: "blur",
-                //     },
-                // ],
+                emailidentify: [
+                    {
+                        required: true,
+                        message: "请输入验证码",
+                        trigger: "blur",
+                    },
+                ],
             },
         };
     },
@@ -136,10 +137,10 @@ export default defineComponent({
         Identify,
     },
     mounted: function () {
-        let identifyCodeSrc =
-            "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg";
-        let objs = document.getElementById("imgIdentifyingCode");
-        objs.src = identifyCodeSrc;
+        // let identifyCodeSrc =
+        //     "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg";
+        // let objs = document.getElementById("imgIdentifyingCode");
+        // objs.src = identifyCodeSrc;
     },
     methods: {
         /**
@@ -157,6 +158,13 @@ export default defineComponent({
             let objs = document.getElementById("imgIdentifyingCode");
             objs.src = identifyCodeSrc;
         },
+		timeout() {
+			this.ifShow = true
+		},
+		getIfShowIdentify() {
+			console.log(this.ifShow)
+			setTimeout(this.timeout, 3000)
+		},
         submitForm(formName) {
             this.$refs[formName].validate((valid) => {
                 if (valid) {
