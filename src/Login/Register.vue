@@ -126,7 +126,7 @@
 </template>
 
 <script>
-import { ElMessage } from 'element-plus'
+import { ElMessage } from "element-plus";
 import { defineComponent, ref } from "vue";
 import { BASE_API } from "../config/dev.js";
 import axios from "axios";
@@ -246,15 +246,24 @@ export default defineComponent({
                         this.imgSrc = window.URL.createObjectURL(resp.data);
                         // console.log(resp.data)
                         if (resp.data.code == 400) {
-                            console.log("30秒后在请求");
+                            ElMessage.warning({
+                                message: resp.data.msg,
+                                center: true,
+                            });
                         }
                     })
                     .catch((error) => {
-                        console.log("图片请求失败");
+                        ElMessage.warning({
+                            message: error,
+                            center: true,
+                        });
                     });
             })
             .catch((error) => {
-                alert("获取失败，请重新获取");
+                ElMessage.warning({
+                    message: error,
+                    center: true,
+                });
             });
     },
     methods: {
@@ -279,12 +288,18 @@ export default defineComponent({
                                 // console.log("获取成功");
                                 console.log(response.data.msg);
                             } else if (response.data.code == 422) {
-                                console.log("邮箱已存在");
+                                ElMessage.warning({
+                                    message: resp.data.msg,
+                                    center: true,
+                                });
                                 //后端验证错误
                             }
                         })
                         .catch((error) => {
-                            alert("获取失败，请重新获取");
+                            ElMessage.warning({
+                                message: error,
+                                center: true,
+                            });
                         });
                 } else {
                     console.log(emailError);
@@ -316,15 +331,24 @@ export default defineComponent({
                                 );
 
                                 if (resp.data.code == 400) {
-                                    console.log("30秒后在请求");
+                                    ElMessage.warning({
+                                        message: resp.data.msg,
+                                        center: true,
+                                    });
                                 }
                             })
                             .catch((error) => {
-                                alert("图片请求失败");
+                                ElMessage.warning({
+                                    message: error,
+                                    center: true,
+                                });
                             });
                     })
                     .catch((error) => {
-                        alert("获取失败，请重新获取");
+                        ElMessage.warning({
+                            message: error,
+                            center: true,
+                        });
                     });
             }
         },
@@ -351,26 +375,35 @@ export default defineComponent({
                                 ElMessage.success({
                                     message: response.data.msg,
                                     type: "success",
-									center: true
+                                    center: true,
                                 });
                                 console.log(response.data.msg);
                             } else if (response.data.code == 422) {
-                                console.log("验证错误");
+                                ElMessage.warning({
+                                    message: resp.data.msg,
+                                    center: true,
+                                });
                                 //后端验证错误
                             } else if (response.data.code == 500) {
-                                console.log("服务端错误");
+                                ElMessage.warning({
+                                    message: resp.data.msg,
+                                    center: true,
+                                });
                                 //服务端密码加密错误
                             }
                         })
                         .catch((error) => {
-                            alert("注册失败，请重新注册");
+                            ElMessage.warning({
+                                message: error,
+                                center: true,
+                            });
                         });
                 } else {
                     // console.log(axios)
                     // console.log(BASE_API)
                     console.log("error submit!!");
 
-                    return false;
+                    // return false;
                 }
             });
         },

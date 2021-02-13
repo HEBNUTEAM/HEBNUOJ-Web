@@ -26,16 +26,16 @@
             <div class="LoginRegister" v-if="ifLogin">
                 <el-dropdown>
                     <span class="el-dropdown-link">
-                        用户名<i
-                            class="el-icon-arrow-down el-icon--right"
-                        ></i>
+                        用户名<i class="el-icon-arrow-down el-icon--right"></i>
                     </span>
                     <template #dropdown>
                         <el-dropdown-menu>
                             <el-dropdown-item>个人中心</el-dropdown-item>
                             <el-dropdown-item>abcde</el-dropdown-item>
                             <el-dropdown-item>sdacsd</el-dropdown-item>
-                            <el-dropdown-item divided>注销</el-dropdown-item>
+                            <el-dropdown-item divided @click="logout()"
+                                >注销</el-dropdown-item
+                            >
                         </el-dropdown-menu>
                     </template>
                 </el-dropdown>
@@ -51,8 +51,10 @@
 // import Register from "./components/Register.vue";
 import axios from "axios";
 import { BASE_API } from "./config/dev";
+import { ElMessage } from "element-plus";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
     name: "App",
     data() {
         return {
@@ -67,21 +69,73 @@ export default {
         // Register,
     },
     mounted() {
-        // axios
-        //     .post(
-        //         BASE_API + "/api/auth/info",
-        //         { headers: { "Authorization": "Bearer " + localStorage.getItem("token") } }
-        //     )
-        //     .then((resp) => {
-        //         console.log(resp.data);
-        //     });
+        axios
+            .post(
+                BASE_API + "/api/auth/info",
+                {},
+                {
+                    headers: {
+                        Authorization:
+                            localStorage.getItem("token") == null
+                                ? ""
+                                : "Bearer " + localStorage.getItem("token"),
+                        RefreshToken:
+                            localStorage.getItem("refresh") == null
+                                ? ""
+                                : localStorage.getItem("refresh"),
+                    },
+                }
+            )
+            .then((resp) => {
+                this.ifLogin = true;
+                console.log(resp);
+            })
+            .catch((error) => {
+                ElMessage.error({
+                    message: error,
+                    type: "success",
+                    center: true,
+                });
+                console.log(error);
+            });
     },
     methods: {
         handleSelect(key, keyPath) {
             console.log(key, keyPath);
         },
+        logout() {
+            axios
+                .post(
+                    BASE_API + "/api/auth/logout",
+                    {},
+                    {
+                        headers: {
+                            Authorization:
+                                localStorage.getItem("token") == null
+                                    ? ""
+                                    : "Bearer " + localStorage.getItem("token"),
+                            RefreshToken:
+                                localStorage.getItem("refresh") == null
+                                    ? ""
+                                    : localStorage.getItem("refresh"),
+                        },
+                    }
+                )
+                .then((resp) => {
+                    console.log(resp);
+                    if (resp.data.code == 200) {
+                        localStorage.removeItem("token");
+                        localStorage.removeItem("refresh");
+                        ElMessage.success({
+                            message: resp.data.msg,
+                            type: "success",
+                            center: true,
+                        });
+                    }
+                });
+        },
     },
-};
+});
 </script>
 
 <style>

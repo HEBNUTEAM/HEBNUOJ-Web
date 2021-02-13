@@ -153,14 +153,54 @@ export default defineComponent({
          */
         getIdentifyingCode: function (bRefresh) {
             if (bRefresh) {
+                axios
+                    .get(BASE_API + "/api/captcha/refresh")
+                    .then((response) => {
+                        if (response.data.code == 200) {
+                            //获取成功
+                            console.log(response.data.data.CaptchaId);
+                            this.form.captchaid = response.data.data.CaptchaId;
+                            // console.log(this.form)
+                        }
+                    })
+                    .then(() => {
+                        axios
+                            .post(
+                                BASE_API + "/api/captcha/show",
+                                { captchaid: this.form.captchaid },
+                                { responseType: "blob" }
+                            )
+                            .then((resp) => {
+                                this.imgSrc = window.URL.createObjectURL(
+                                    resp.data
+                                );
+
+                                if (resp.data.code == 400) {
+                                    ElMessage.warning({
+                                        message: resp.data.msg,
+                                        center: true,
+                                    });
+                                }
+                            })
+                            .catch((error) => {
+                                ElMessage.warning({
+                                    message: error,
+                                    center: true,
+                                });
+                            });
+                    })
+                    .catch((error) => {
+                        ElMessage.warning({
+                            message: error,
+                            center: true,
+                        });
+                    });
             }
-        },
-        timeout() {
-            this.ifShow = true;
         },
         getIfShowIdentify() {
             // console.log(this.ifShow)
             // setTimeout(this.timeout, 3000)
+            let _this = this;
             this.$refs.form.validateField("email", (emailError) => {
                 if (!emailError) {
                     axios
@@ -170,21 +210,69 @@ export default defineComponent({
                         .then((resp) => {
                             console.log(resp.data);
                             if (resp.data.code == 200) {
-                                if (resp.data.msg == true) {
-                                    this.ifShow == true;
+                                if (resp.data.msg == "true") {
+                                    this.ifShow = true;
+                                    // console.log(this.ifShow)
+                                    axios
+                                        .get(BASE_API + "/api/captcha/refresh")
+                                        .then((response) => {
+                                            if (response.data.code == 200) {
+                                                //获取成功
+                                                // console.log(response.data.data.CaptchaId);
+                                                this.form.captchaid =
+                                                    response.data.data.CaptchaId;
+                                                // console.log(this.form)
+                                            }
+                                        })
+                                        .then(() => {
+                                            axios
+                                                .post(
+                                                    BASE_API +
+                                                        "/api/captcha/show",
+                                                    {
+                                                        captchaid: this.form
+                                                            .captchaid,
+                                                    },
+                                                    { responseType: "blob" }
+                                                )
+                                                .then((resp) => {
+                                                    this.imgSrc = window.URL.createObjectURL(
+                                                        resp.data
+                                                    );
+                                                    // console.log(resp.data)
+                                                    if (resp.data.code == 400) {
+                                                        ElMessage.warning({
+                                                            message:
+                                                                resp.data.msg,
+                                                            center: true,
+                                                        });
+                                                    }
+                                                })
+                                                .catch((error) => {
+                                                    ElMessage.warning({
+                                                        message: error,
+                                                        center: true,
+                                                    });
+                                                });
+                                        })
+                                        .catch((error) => {
+                                            ElMessage.warning({
+                                                message: error,
+                                                center: true,
+                                            });
+                                        });
                                 }
                             }
                         });
+                } else {
+                    console.log(emailError);
                 }
-				else {
-					console.log(emailError);
-				}
             });
         },
         submitForm(formName) {
             this.$refs[formName].validate((valid) => {
                 if (valid) {
-                    console.log(this.form);
+                    // console.log(this.form);
                     axios
                         .post(BASE_API + "/api/auth/login", this.form)
                         .then((resp) => {
@@ -200,21 +288,41 @@ export default defineComponent({
                                     "token",
                                     resp.data.data.token
                                 );
+                                localStorage.setItem(
+                                    "refresh",
+                                    resp.data.data.refresh
+                                );
                                 this.$router.replace("/");
                             } else if (resp.data.code == 400) {
                                 //密码错误
+                                ElMessage.warning({
+                                    message: resp.data.msg,
+                                    center: true,
+                                });
                             } else if (resp.data.code == 500) {
                                 //服务端异常
+                                ElMessage.warning({
+                                    message: resp.data.msg,
+                                    center: true,
+                                });
                             } else if (resp.data.code == 422) {
                                 //用户不存在、图形验证码错误
+                                ElMessage.warning({
+                                    message: resp.data.msg,
+                                    center: true,
+                                });
                             }
                         })
                         .catch((error) => {
+                            ElMessage.warning({
+                                message: error,
+                                center: true,
+                            });
                             console.log(error);
                         });
                 } else {
                     console.log("error submit!!");
-                    return false;
+                    // return false;
                 }
             });
         },
