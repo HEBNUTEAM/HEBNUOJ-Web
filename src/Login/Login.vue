@@ -140,6 +140,7 @@ export default defineComponent({
     components: {
         Identify,
     },
+	// inject: ["reload"],
     mounted: function () {
         // let identifyCodeSrc =
         //     "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg";
@@ -292,6 +293,8 @@ export default defineComponent({
                                     "refresh",
                                     resp.data.data.refresh
                                 );
+								// location.reload()
+								// this.reload();
                                 this.$router.replace("/");
                             } else if (resp.data.code == 400) {
                                 //密码错误

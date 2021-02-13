@@ -41,7 +41,8 @@
                 </el-dropdown>
             </div>
         </el-menu>
-        <router-view />
+        <router-view/>
+		 <!-- v-if="isRouterAlive" -->
     </div>
 </template>
 
@@ -61,8 +62,14 @@ export default defineComponent({
             ifLogin: false,
             activeIndex: "1",
             activeIndex2: "1",
+			isRouterAlive: true
         };
     },
+	// provide () {
+	// 	return {
+	// 		reload: this.reload
+	// 	}
+	// },
     components: {
         // ScoreBoard,
         // Login,
@@ -87,7 +94,10 @@ export default defineComponent({
                 }
             )
             .then((resp) => {
-                this.ifLogin = true;
+				if(resp != undefined){
+					this.ifLogin = true;
+				}
+                
                 console.log(resp);
             })
             .catch((error) => {
@@ -100,6 +110,12 @@ export default defineComponent({
             });
     },
     methods: {
+		// reload() {
+		// 	this.isRouterAlive = false;
+		// 	this.$nextTick(function(){
+		// 		this.isRouterAlive = true;
+		// 	})
+		// },
         handleSelect(key, keyPath) {
             console.log(key, keyPath);
         },
@@ -124,6 +140,7 @@ export default defineComponent({
                 .then((resp) => {
                     console.log(resp);
                     if (resp.data.code == 200) {
+						this.ifLogin = false;
                         localStorage.removeItem("token");
                         localStorage.removeItem("refresh");
                         ElMessage.success({
