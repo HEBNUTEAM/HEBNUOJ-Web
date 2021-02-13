@@ -126,6 +126,7 @@
 </template>
 
 <script>
+import { ElMessage } from 'element-plus'
 import { defineComponent, ref } from "vue";
 import { BASE_API } from "../config/dev.js";
 import axios from "axios";
@@ -243,7 +244,7 @@ export default defineComponent({
                     )
                     .then((resp) => {
                         this.imgSrc = window.URL.createObjectURL(resp.data);
-						// console.log(resp.data)
+                        // console.log(resp.data)
                         if (resp.data.code == 400) {
                             console.log("30秒后在请求");
                         }
@@ -268,9 +269,11 @@ export default defineComponent({
                     this.timer = 60;
                     this.countDown();
                     axios
-                        .post(BASE_API + "/api/email/refresh", {email: this.form.email})
+                        .post(BASE_API + "/api/email/refresh", {
+                            email: this.form.email,
+                        })
                         .then((response) => {
-							console.log(response.data)
+                            console.log(response.data);
                             if (response.data.code == 200) {
                                 //获取成功
                                 // console.log("获取成功");
@@ -345,7 +348,11 @@ export default defineComponent({
                         .then((response) => {
                             if (response.data.code == 200) {
                                 //注册成功
-                                console.log("注册成功");
+                                ElMessage.success({
+                                    message: response.data.msg,
+                                    type: "success",
+									center: true
+                                });
                                 console.log(response.data.msg);
                             } else if (response.data.code == 422) {
                                 console.log("验证错误");

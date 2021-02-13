@@ -6,7 +6,11 @@
         </div>
         <el-form ref="form" :model="form" :rules="rules">
             <el-form-item prop="email">
-                <el-input placeholder="用户名/邮箱" v-model="form.email" @blur="getIfShowIdentify()">
+                <el-input
+                    placeholder="邮箱"
+                    v-model="form.email"
+                    @blur="getIfShowIdentify()"
+                >
                     <template #prefix>
                         <i
                             class="iconfont icon-yonghu-fuben"
@@ -16,11 +20,7 @@
                 </el-input>
             </el-form-item>
             <el-form-item prop="pwd">
-                <el-input
-                    placeholder="密码"
-                    v-model="form.pwd"
-                    show-pwd
-                >
+                <el-input placeholder="密码" v-model="form.pwd" show-password>
                     <template #prefix>
                         <i
                             class="iconfont icon-suo"
@@ -36,8 +36,8 @@
                     </template>
                 </el-input>
             </el-form-item>
-            <el-form-item prop="emailidentify" v-if="ifShow">
-                <el-input placeholder="验证码" v-model="form.emailidentify">
+            <el-form-item prop="captcha" v-if="ifShow">
+                <el-input placeholder="验证码" v-model="form.captcha">
                     <template #prefix>
                         <i
                             class="iconfont icon-dunpaibaowei"
@@ -54,6 +54,7 @@
                         style="height: 38px; width: 100px; cursor: pointer"
                         alt="点击更换"
                         title="点击更换"
+                        :src="imgSrc"
                     />
                 </div>
                 <!-- <Identify></Identify> -->
@@ -93,6 +94,7 @@
 </template>
 
 <script>
+import { ElMessage } from "element-plus";
 import { defineComponent, ref } from "vue";
 import Identify from "./Identify.vue";
 import axios from "axios";
@@ -102,17 +104,19 @@ export default defineComponent({
     name: "Login",
     data() {
         return {
-			ifShow: false,
+            ifShow: false,
+            imgSrc: "",
             form: {
                 email: "",
                 pwd: "",
-                emailidentify: "",
+                captchaid: "",
+                captcha: "",
             },
             rules: {
                 email: [
                     {
                         required: true,
-                        message: "请输入用户名/邮箱",
+                        message: "请输入邮箱",
                         trigger: "blur",
                     },
                 ],
@@ -123,7 +127,7 @@ export default defineComponent({
                         trigger: "blur",
                     },
                 ],
-                emailidentify: [
+                captcha: [
                     {
                         required: true,
                         message: "请输入验证码",
@@ -148,34 +152,66 @@ export default defineComponent({
          * @param {Boolean} bRefresh 是否刷新
          */
         getIdentifyingCode: function (bRefresh) {
-            let identifyCodeSrc =
-                "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg";
             if (bRefresh) {
-                identifyCodeSrc =
-                    // "https://www.xxx.xxx.xxx/imgCode?" + Math.random();
-                    "https://alifei05.cfp.cn/creative/vcg/veer/1600water/veer-140775274.jpg";
             }
-            let objs = document.getElementById("imgIdentifyingCode");
-            objs.src = identifyCodeSrc;
         },
-		timeout() {
-			this.ifShow = true
-		},
-		getIfShowIdentify() {
-			console.log(this.ifShow)
-			setTimeout(this.timeout, 3000)
-		},
+        timeout() {
+            this.ifShow = true;
+        },
+        getIfShowIdentify() {
+            // console.log(this.ifShow)
+            // setTimeout(this.timeout, 3000)
+            this.$refs.form.validateField("email", (emailError) => {
+                if (!emailError) {
+                    axios
+                        .post(BASE_API + "/api/captcha/isNeedCaptcha", {
+                            email: this.form.email,
+                        })
+                        .then((resp) => {
+                            console.log(resp.data);
+                            if (resp.data.code == 200) {
+                                if (resp.data.msg == true) {
+                                    this.ifShow == true;
+                                }
+                            }
+                        });
+                }
+				else {
+					console.log(emailError);
+				}
+            });
+        },
         submitForm(formName) {
             this.$refs[formName].validate((valid) => {
                 if (valid) {
                     console.log(this.form);
-                    axios.post(BASE_API + "/api/auth/login", this.form)
-                        .then(resp => {
-                            this.$message({
-                                type: 'success',
-                                message: '登陆成功！'
-                            })
+                    axios
+                        .post(BASE_API + "/api/auth/login", this.form)
+                        .then((resp) => {
+                            console.log(resp.data);
+                            if (resp.data.code == 200) {
+                                //登陆成功
+                                ElMessage.success({
+                                    message: resp.data.msg,
+                                    type: "success",
+                                    center: true,
+                                });
+                                localStorage.setItem(
+                                    "token",
+                                    resp.data.data.token
+                                );
+                                this.$router.replace("/");
+                            } else if (resp.data.code == 400) {
+                                //密码错误
+                            } else if (resp.data.code == 500) {
+                                //服务端异常
+                            } else if (resp.data.code == 422) {
+                                //用户不存在、图形验证码错误
+                            }
                         })
+                        .catch((error) => {
+                            console.log(error);
+                        });
                 } else {
                     console.log("error submit!!");
                     return false;
