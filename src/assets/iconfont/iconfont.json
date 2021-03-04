@@ -6,6 +6,62 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "1019460",
+      "name": "其他",
+      "font_class": "qita",
+      "unicode": "e62f",
+      "unicode_decimal": 58927
+    },
+    {
+      "icon_id": "1299637",
+      "name": "题库",
+      "font_class": "tiku",
+      "unicode": "e686",
+      "unicode_decimal": 59014
+    },
+    {
+      "icon_id": "1672670",
+      "name": "比赛",
+      "font_class": "bisai",
+      "unicode": "e692",
+      "unicode_decimal": 59026
+    },
+    {
+      "icon_id": "5183544",
+      "name": "排名",
+      "font_class": "paiming",
+      "unicode": "e747",
+      "unicode_decimal": 59207
+    },
+    {
+      "icon_id": "7736175",
+      "name": "home",
+      "font_class": "home",
+      "unicode": "e8fa",
+      "unicode_decimal": 59642
+    },
+    {
+      "icon_id": "15012039",
+      "name": "用户组",
+      "font_class": "yonghuzu",
+      "unicode": "ea32",
+      "unicode_decimal": 59954
+    },
+    {
+      "icon_id": "19528582",
+      "name": "沙漏",
+      "font_class": "mian111-27",
+      "unicode": "e64b",
+      "unicode_decimal": 58955
+    },
+    {
+      "icon_id": "5714890",
+      "name": "菜单",
+      "font_class": "caidan",
+      "unicode": "e668",
+      "unicode_decimal": 58984
+    },
+    {
       "icon_id": "982375",
       "name": "邮箱",
       "font_class": "youxiang",

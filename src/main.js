@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+
 import ElementPlus from 'element-plus';
 import 'element-plus/lib/theme-chalk/index.css';
 import App from './App.vue'
@@ -7,9 +8,18 @@ import '@/assets/iconfont/iconfont.css'
 import axios from 'axios'
 
 
+import VueMarkdownEditor from '../node_modules/@kangc/v-md-editor';
+import '../node_modules/@kangc/v-md-editor/lib/style/base-editor.css';
+import vuepressTheme from '../node_modules/@kangc/v-md-editor/lib/theme/vuepress.js';
+import '../node_modules/@kangc/v-md-editor/lib/theme/style/vuepress.css';
+
+VueMarkdownEditor.use(vuepressTheme);
+
+
 
 const app = createApp(App).use(router)
 app.use(ElementPlus)
+app.use(VueMarkdownEditor);
 
 axios.interceptors.response.use(
 	response => {
@@ -23,8 +33,8 @@ axios.interceptors.response.use(
 		}
 		if (response.headers.token) {
 			localStorage.setItem(
-				"token",
-				resp.data.data.token
+				"jwtToken",
+				resp.data.data.jwtToken
 			);
 		}
 		if(response.data.code == 401) {
@@ -44,6 +54,7 @@ router.beforeEach((to, from, next) => {
 	}
 	next()
 })
+
 app.mount('#app')
 
 

@@ -286,8 +286,8 @@ export default defineComponent({
                                     center: true,
                                 });
                                 localStorage.setItem(
-                                    "token",
-                                    resp.data.data.token
+                                    "jwtToken",
+                                    resp.data.data.jwtToken
                                 );
                                 localStorage.setItem(
                                     "refresh",
@@ -388,11 +388,11 @@ img {
 }
 .divIdentifyingCode {
     position: absolute;
-    top: 2px;
+    top: 1px;
     right: 0;
     z-index: 5;
     width: 100px; /*设置图片显示的宽*/
-    height: 38px; /*图片显示的高*/
+    height: 40px; /*图片显示的高*/
     background: #e2e2e2;
     margin: 0;
 }
